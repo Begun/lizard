@@ -1,0 +1,78 @@
+lizard
+======
+
+Lizard is a multithreaded HTTP server engine.
+
+Architecture
+------------
+
+A lizard-based application is basically a plugin into the engine, which
+must provide callbacks for handling HTTP requests.
+
+The callbacks are handled by two separately configurable pools of threads,
+"easy" threads and "hard" threads. The logic behind it is that "easy" thread
+can pass any request to the "hard" one, and the "hard" thread can either process
+the request or fail, in which case 503 will be returned to the client
+
+The plugin may be built either as dynamically loaded .so or statically
+linked with the engine into a single binary.
+
+Plugin interface
+----------------
+
+ * handle_easy - common HTTP request handler.
+ * handle_hard - extra HTTP requtest handler
+ * set_param   - configuration callback. Lizard calls it providing the
+ configuration file name for plugin to parse it for options, if any.
+ * idle        - arbitary periodically called function.
+
+The plugin must be a class inherited from `lizard::plugin` class.
+For reference please consult `src/test*/`.
+
+Configuration
+-------------
+
+Config file
+~~~~~~~~~~~
+
+The configuration file for both the engine and the plugin is in XML format.
+
+For the engine, it provides the following options:
+
+ * <pid_file_name>        - pid-file name (for usage in daemontools etc. it can also be provided via a command-line option)
+ * <log_file_name>        - log file name.
+ * <log_level>            - log level, which can be any of: alert crit error warn notice info debug (sorted by descent of importance)
+ * <access_log_file_name> - if this option is not empty, access log file name.
+
+ * <stats>                - stats handler listen options.
+
+ * <plugin>               - plugin options:
+     ** <ip>,<port>            - address and port to listen for incoming connections on.
+     ** <connection_timeout>   - handler connection timeout.
+     ** <idle_timeout>         - plugin idle function call period.
+
+     ** <library>              - the path to plugin .so (irrelevant if linked statically, but still should be present).
+
+     ** <easy_threads>         - "easy" thread count
+     ** <hard_threads>         - "hard" thread count
+     ** <easy_queue_limit>     - "easy" queue limit (no limit if not specified).
+     ** <hard_queue_limit>     - "hard" queue limit (no limit if not specified).
+
+Any plugin options should be contained in the same file as valid XML entries inside the root (`<lizard>`) tag.
+
+Command-line options
+~~~~~~~~~~~~~~~~~~~~
+ * -c, --config-file <path> : path to the configuration file
+ * -p, --pid-file    <path> : path to pid file (overrides the one provided in configuration file)
+ * -D, --no-daemon          : do not daemonize
+ * -s, --sync-exit          : handle exit signals
+ * -v, --version            : print version and exit
+
+Credits
+-------
+
+(c) 2011, ZAO "Begun"
+
+https://github.com/Begun/lizard
+
+This software is licensed under the GNU LGPL. Please see the LICENSE file.
