@@ -17,6 +17,16 @@ the request or fail, in which case 503 will be returned to the client
 The plugin may be built either as dynamically loaded .so or statically
 linked with the engine into a single binary.
 
+Build requirements
+------------------
+
+ * Linux system (tested mainly on x86_64, but will probably work on x86 as well).
+ * cmake.
+ * gcc.
+ * Boost thread library.
+ * Judy memory arrays library.
+ * Expat XML parser library.
+
 Plugin interface
 ----------------
 
